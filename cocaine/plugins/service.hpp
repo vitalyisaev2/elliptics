@@ -39,6 +39,7 @@ class elliptics_service_t : public api::service_t
 
 		deferred<std::string> read(const std::string &collection, const std::string &key);
 		deferred<void> write(const std::string &collection, const std::string &key, const std::string &blob, const std::vector<std::string> &tags);
+    deferred<void> write_with_ttl(const std::string &collection, const std::string &key, const std::string &blob, const std::vector<std::string> &tags, long timeout);
 		deferred<std::vector<std::string> > find(const std::string &collection, const std::vector<std::string> &tags);
 		deferred<void> remove(const std::string &collection, const std::string &key);
 		deferred<std::string> cache_read(const std::string &collection, const std::string &key);

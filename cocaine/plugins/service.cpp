@@ -44,6 +44,7 @@ elliptics_service_t::elliptics_service_t(context_t &context, io::reactor_t &reac
 	on<io::storage::find  >("find",   std::bind(&elliptics_service_t::find,   this, _1, _2));
 	on<io::elliptics::cache_read >("cache_read",  std::bind(&elliptics_service_t::cache_read,  this, _1, _2));
 	on<io::elliptics::cache_write>("cache_write", std::bind(&elliptics_service_t::cache_write, this, _1, _2, _3, _4));
+  on<io::elliptics::write_with_ttl>("write_with_ttl", std::bind(&elliptics_service_t::write_with_ttl, this, _1, _2, _3, _4, _5));
 	on<io::elliptics::bulk_read  >("bulk_read",   std::bind(&elliptics_service_t::bulk_read,   this, _1, _2));
 	on<io::elliptics::read_latest>("read_latest", std::bind(&elliptics_service_t::read_latest, this, _1, _2));
 }
@@ -76,6 +77,17 @@ deferred<void> elliptics_service_t::write(const std::string &collection, const s
 	deferred<void> promise;
 
 	m_elliptics->async_write(collection, key, blob, tags).connect(std::bind(&elliptics_service_t::on_write_completed,
+		promise, _1, _2));
+
+	return promise;
+}
+
+deferred<void> elliptics_service_t::write_with_ttl(const std::string &collection, const std::string &key, const std::string &blob, const std::vector<std::string> &tags, long timeout)
+{
+	debug() << "write, collection: " << collection << ", key: " << key << ", ttl: " << timeout << std::endl;
+	deferred<void> promise;
+
+	m_elliptics->async_write_with_ttl(collection, key, blob, tags, timeout).connect(std::bind(&elliptics_service_t::on_write_completed,
 		promise, _1, _2));
 
 	return promise;

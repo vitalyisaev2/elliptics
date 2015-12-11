@@ -46,6 +46,18 @@ struct cache_read
 	result_type;
 };
 
+struct write_with_ttl {
+	typedef elliptics_tag tag;
+
+	typedef boost::mpl::list<
+    std::string,
+		std::string,
+		std::string,
+  	std::vector<std::string>,
+		io::optional_with_default<long, 0>
+	> tuple_type;
+};
+
 struct read_latest
 {
 	typedef elliptics_tag tag;
@@ -128,6 +140,7 @@ struct protocol<elliptics_tag> : public extends<storage_tag>
 	>::type version;
 
 	typedef boost::mpl::list<
+    elliptics::write_with_ttl,
 		elliptics::cache_read,
 		elliptics::cache_write,
 		elliptics::bulk_read,

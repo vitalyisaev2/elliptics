@@ -339,6 +339,40 @@ ell::async_write_result elliptics_storage_t::async_write(const std::string &coll
 	return result;
 }
 
+ell::async_write_result elliptics_storage_t::async_write_with_ttl(const std::string &collection, const std::string &key, const std::string &blob, const std::vector<std::string> &tags, long timeout)
+{
+	using namespace std::placeholders;
+
+	COCAINE_LOG_DEBUG(
+		m_log,
+		"writing the '%s' object, collection: '%s', ttl: '%d'",
+		key,
+		collection,
+    timeout
+	);
+
+	ell::session session = m_session.clone();
+  session.set_ioflags(DNET_IO_FLAGS_CACHE | DNET_IO_FLAGS_CACHE_REMOVE_FROM_DISK);
+	session.set_namespace(collection.data(), collection.size());
+	session.set_filter(ioremap::elliptics::filters::all_with_ack);
+	session.set_timeout(m_timeouts.write);
+	session.set_checker(m_success_copies_num);
+
+	auto write_result = session.write_data(key, blob, 0);
+  auto write_result2 = session.write_cache(key, blob, timeout);
+
+	if (tags.empty()) {
+		return write_result;
+	}
+
+	ell::async_write_result result(session);
+	ell::async_result_handler<ell::write_result_entry> handler(result);
+
+	write_result.connect(std::bind(on_write_finished, m_log, handler, session, key, tags, _1, _2));
+
+	return result;
+}
+
 ell::async_find_indexes_result elliptics_storage_t::async_find(const std::string &collection, const std::vector<std::string> &tags)
 {
 	COCAINE_LOG_DEBUG(

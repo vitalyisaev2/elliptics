@@ -75,6 +75,9 @@ class elliptics_storage_t : public api::storage_t
 		ioremap::elliptics::async_read_result async_read(const std::string &collection, const std::string &key);
 		ioremap::elliptics::async_write_result async_write(const std::string &collection, const std::string &key,
 			const std::string &blob, const std::vector<std::string> &tags);
+    ioremap::elliptics::async_write_result async_write_with_ttl(const std::string &collection, const std::string &key,
+			const std::string &blob, const std::vector<std::string> &tags, long timeout);
+    
 		ioremap::elliptics::async_find_indexes_result async_find(const std::string &collection, const std::vector<std::string> &tags);
 		ioremap::elliptics::async_remove_result async_remove(const std::string &collection, const std::string &key);
 		ioremap::elliptics::async_read_result async_cache_read(const std::string &collection, const std::string &key);

@@ -36,7 +36,12 @@ public:
 	cache_read(const std::string &collection, const std::string &key) {
 		return call<io::elliptics::cache_read>(collection, key);
 	}
-
+  
+  service_traits<io::elliptics::write_with_ttl>::future_type
+	write_with_ttl(const std::string &collection, const std::string &key, const std::string &blob, const std::vector<std::string> &tags, long timeout) {
+		return call<io::elliptics::write_with_ttl>(collection, key, blob, tags, timeout);
+	}
+  
 	service_traits<io::elliptics::cache_write>::future_type
 	cache_write(const std::string &collection, const std::string &key, const std::string &blob, int timeout) {
 		return call<io::elliptics::cache_write>(collection, key, blob, timeout);
