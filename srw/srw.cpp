@@ -50,6 +50,9 @@
 #include "cocaine-json-trait.hpp"
 #include "elliptics.h"
 
+#include <blackhole/logger.hpp>
+#include <blackhole/macro.hpp>
+
 #define SRW_LOG(__log__, __level__, __app__, ...) \
 	BH_LOG((__log__), (__level__), __VA_ARGS__) \
 		("app", (__app__)) \
@@ -336,7 +339,7 @@ class dnet_sink_t: public cocaine::logging::logger_concept_t {
 
 		virtual void emit(cocaine::logging::priorities prio, const std::string &app, const std::string& message) {
 			dnet_log_level level = convert_verbosity(prio);
-			SRW_LOG(*m_node->log, level, app, "%s", message);
+			SRW_LOG(*m_node->log, level, app, "%s", message.c_str());
 		}
 
 	private:
@@ -347,7 +350,7 @@ class srw {
 	public:
 		srw(struct dnet_node *n, const std::string &config) :
 		m_node(n),
-		m_ctx(config, blackhole::utils::make_unique<dnet_sink_t>(m_node))
+		m_ctx(config, blackhole::aux::util::make_unique<dnet_sink_t>(m_node))
 		{
 			atomic_set(&m_src_key, 1);
 

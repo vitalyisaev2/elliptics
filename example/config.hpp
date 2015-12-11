@@ -343,7 +343,9 @@ private:
 
 struct config_data : public dnet_config_data
 {
-	config_data() : logger(logger_base, blackhole::log::attributes_t())
+	config_data()
+	: logger_base(DNET_LOG_ERROR)
+	, logger(logger_base, blackhole::attribute::set_t({keyword::request_id() = 0}))
 	{
 		dnet_empty_time(&config_timestamp);
 	}

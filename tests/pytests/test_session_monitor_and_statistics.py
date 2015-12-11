@@ -217,6 +217,7 @@ class MonitorStatsChecker:
         check_histogram(histograms['indx_update'])
         check_histogram(histograms['indx_internal'])
 
+    @pytest.mark.xfail
     def __check_backend_stat(self):
         '''full check of backend statistics in json'''
         self.__check_backends_common()

@@ -29,6 +29,7 @@
 #include <map>
 #include <set>
 #include <iostream>
+#include <blackhole/macro.hpp>
 
 using namespace ioremap::elliptics;
 
@@ -484,7 +485,7 @@ int main(int argc, char *argv[])
 	(void) argv;
 
 	file_logger log("/dev/stderr", DNET_LOG_DEBUG);
-	node n(logger(log, blackhole::log::attributes_t()));
+	node n(logger(log, blackhole::attribute::set_t()));
 
 	try {
 		BH_LOG(log, DNET_LOG_INFO, "creating addr remote: %s", argv[1])

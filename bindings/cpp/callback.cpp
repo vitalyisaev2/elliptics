@@ -17,6 +17,8 @@
 #include "callback_p.h"
 #include "../../library/elliptics.h"
 
+#include <blackhole/macro.hpp>
+
 namespace ioremap { namespace elliptics {
 
 namespace detail {

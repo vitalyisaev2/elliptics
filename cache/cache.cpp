@@ -20,7 +20,9 @@
 
 #include <fstream>
 
-#include "boost/lexical_cast.hpp"
+#include <boost/lexical_cast.hpp>
+
+#include <blackhole/macro.hpp>
 
 #include "monitor/monitor.h"
 #include "monitor/monitor.hpp"
@@ -46,7 +48,7 @@ std::unique_ptr<cache_config> cache_config::parse(const elliptics::config::confi
 	config.count = cache.at<size_t>("shards", DNET_DEFAULT_CACHES_NUMBER);
 	config.sync_timeout = cache.at<unsigned>("sync_timeout", DNET_DEFAULT_CACHE_SYNC_TIMEOUT_SEC);
 	config.pages_proportions = cache.at("pages_proportions", std::vector<size_t>(DNET_DEFAULT_CACHE_PAGES_NUMBER, 1));
-	return blackhole::utils::make_unique<cache_config>(config);
+	return blackhole::aux::util::make_unique<cache_config>(config);
 }
 
 cache_manager::cache_manager(dnet_backend_io *backend, dnet_node *n, const cache_config &config) : m_node(n) {

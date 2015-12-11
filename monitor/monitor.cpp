@@ -22,6 +22,7 @@
 #include "compress.hpp"
 
 #include <exception>
+#include <blackhole/macro.hpp>
 
 #include "library/elliptics.h"
 #include "io_stat_provider.hpp"
@@ -63,7 +64,7 @@ std::unique_ptr<monitor_config> monitor_config::parse(const elliptics::config::c
 		cfg.period_in_seconds = top.at<int>("period_in_seconds", DNET_DEFAULT_MONITOR_TOP_PERIOD);
 		cfg.has_top = (cfg.top_length > 0) && (cfg.events_size > 0) && (cfg.period_in_seconds > 0);
 	}
-	return blackhole::utils::make_unique<monitor_config>(cfg);
+	return blackhole::aux::util::make_unique<monitor_config>(cfg);
 }
 
 monitor::monitor(struct dnet_node *n, struct dnet_config *cfg)

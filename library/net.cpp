@@ -31,6 +31,7 @@
 #include <fcntl.h>
 
 #include <netinet/tcp.h>
+#include <blackhole/macro.hpp>
 
 #include <set>
 

@@ -63,7 +63,7 @@ log_adapter_impl_t::log_adapter_impl_t(const std::shared_ptr<logging::log_t> &lo
 {
 }
 
-void log_adapter_impl_t::handle(const blackhole::log::record_t &record)
+void log_adapter_impl_t::handle(const blackhole::record_t &record)
 {
 	dnet_log_level level = record.extract<dnet_log_level>(blackhole::keyword::severity<dnet_log_level>().name());
 	auto cocaine_level = convert_verbosity(level);
@@ -71,9 +71,10 @@ void log_adapter_impl_t::handle(const blackhole::log::record_t &record)
 }
 
 log_adapter_t::log_adapter_t(const std::shared_ptr<logging::log_t> &log)
+  : ioremap::elliptics::logger_base(DNET_LOG_DEBUG)
 {
-	add_frontend(blackhole::utils::make_unique<log_adapter_impl_t>(log));
-	verbosity(convert_verbosity(log->verbosity()));
+	add_frontend(blackhole::aux::util::make_unique<log_adapter_impl_t>(log));
+	set_filter(convert_verbosity(log->verbosity()));
 }
 
 namespace {
@@ -326,6 +327,40 @@ ell::async_write_result elliptics_storage_t::async_write(const std::string &coll
 	session.set_checker(m_success_copies_num);
 
 	auto write_result = session.write_data(key, blob, 0);
+
+	if (tags.empty()) {
+		return write_result;
+	}
+
+	ell::async_write_result result(session);
+	ell::async_result_handler<ell::write_result_entry> handler(result);
+
+	write_result.connect(std::bind(on_write_finished, m_log, handler, session, key, tags, _1, _2));
+
+	return result;
+}
+
+ell::async_write_result elliptics_storage_t::async_write_with_ttl(const std::string &collection, const std::string &key, const std::string &blob, const std::vector<std::string> &tags, long timeout)
+{
+	using namespace std::placeholders;
+
+	COCAINE_LOG_DEBUG(
+		m_log,
+		"writing the '%s' object, collection: '%s', ttl: '%d'",
+		key,
+		collection,
+    timeout
+	);
+
+	ell::session session = m_session.clone();
+  session.set_ioflags(DNET_IO_FLAGS_CACHE | DNET_IO_FLAGS_CACHE_REMOVE_FROM_DISK);
+	session.set_namespace(collection.data(), collection.size());
+	session.set_filter(ioremap::elliptics::filters::all_with_ack);
+	session.set_timeout(m_timeouts.write);
+	session.set_checker(m_success_copies_num);
+
+	auto write_result = session.write_data(key, blob, 0);
+  auto write_result2 = session.write_cache(key, blob, timeout);
 
 	if (tags.empty()) {
 		return write_result;

@@ -66,7 +66,7 @@ Description: Distributed hash table storage (debug files)
 
 Package: elliptics-dev
 Architecture: any
-Depends: elliptics-client (= ${Source-Version}), blackhole-dev (>= 0.2.3-1)
+Depends: elliptics-client (= ${Source-Version}), blackhole5-dev (>= 0.5)
 Description: Distributed hash table storage (includes)
  Elliptics network is a fault tolerant distributed hash table object storage.
 

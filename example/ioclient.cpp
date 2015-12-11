@@ -32,6 +32,8 @@
 
 #include <netinet/in.h>
 
+#include <blackhole/macro.hpp>
+
 #include "elliptics/cppdef.h"
 #include "elliptics/backends.h"
 
@@ -265,7 +267,7 @@ int main(int argc, char *argv[])
 			cfg.flags |= DNET_CFG_NO_ROUTE_LIST;
 		}
 
-		node n(logger(log, blackhole::log::attributes_t()), cfg);
+		node n(logger(log, blackhole::attribute::set_t()), cfg);
 		session s(n);
 
 		s.set_cflags(cflags);

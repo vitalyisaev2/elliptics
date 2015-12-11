@@ -3,6 +3,8 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 
+#include <blackhole/macro.hpp>
+
 namespace ioremap { namespace elliptics {
 
 class file_descriptor
@@ -52,7 +54,7 @@ void session::read_file(const key &id, const std::string &file, uint64_t offset,
 	}
 
 	BH_LOG(get_logger(), DNET_LOG_NOTICE, "%s: read completed: file: '%s', offset: %llu, size: %llu, status: %d.",
-			dnet_dump_id(&id.id()), file, offset, uint64_t(io->size), int(result.command()->status));
+			dnet_dump_id(&id.id()), file.c_str(), offset, uint64_t(io->size), int(result.command()->status));
 }
 
 void session::write_file(const key &id, const std::string &file, uint64_t local_offset,
@@ -82,7 +84,7 @@ void session::write_file(const key &id, const std::string &file, uint64_t local_
 
 	if (local_offset >= (uint64_t)stat.st_size) {
 		BH_LOG(get_logger(), DNET_LOG_NOTICE, "%s: File is already uploaded: '%s'",
-				dnet_dump_id(&id.id()), file);
+				dnet_dump_id(&id.id()), file.c_str());
 		return;
 	}
 

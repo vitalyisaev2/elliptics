@@ -163,7 +163,7 @@ class node
 		~node();
 
 		static node from_raw(dnet_node *n);
-		static node from_raw(dnet_node *n, blackhole::log::attributes_t attributes);
+		static node from_raw(dnet_node *n, blackhole::attribute::set_t attributes);
 
 		node &operator =(const node &other);
 

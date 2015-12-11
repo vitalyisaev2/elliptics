@@ -740,7 +740,7 @@ int dnet_cmd_backend_control(struct dnet_net_state *st, struct dnet_cmd *cmd, vo
 	struct dnet_backend_control *control = reinterpret_cast<dnet_backend_control *>(data);
 
 	try {
-		blackhole::log::attributes_t attributes = {
+		blackhole::attribute::set_t attributes = {
 			blackhole::attribute::make("backend_id", uint32_t(control->backend_id))
 		};
 
@@ -829,7 +829,7 @@ void dnet_backend_info::parse(ioremap::elliptics::config::config_data *data,
 		const auto cache = backend.at("cache");
 		cache_config = ioremap::cache::cache_config::parse(cache);
 	} else if (data->cache_config) {
-		cache_config = blackhole::utils::make_unique<ioremap::cache::cache_config>(*data->cache_config);
+		cache_config = blackhole::aux::util::make_unique<ioremap::cache::cache_config>(*data->cache_config);
 	}
 
 	io_thread_num = backend.at("io_thread_num", data->cfg_state.io_thread_num);

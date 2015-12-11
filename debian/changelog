@@ -1,3 +1,8 @@
+elliptics (2.26.9.3-sputnik1) unstable; urgency=low
+  * Applying patch from https://github.com/coldze/elliptics/tree/modify
+
+ -- Vitaly Isaev <zbr@ioremap.net>  Thu, 11 Dec 2015 13:59:10 +0400
+
 elliptics (2.26.9.3) unstable; urgency=low
 
   * package: depend on eblob 0.23.11+, which contains new iterator flag to verify checksum

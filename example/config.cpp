@@ -53,6 +53,7 @@
 #include "../cache/cache.hpp"
 
 #include <boost/lexical_cast.hpp>
+#include <blackhole/macro.hpp>
 
 #include <type_traits>
 
@@ -123,7 +124,7 @@ static void parse_logger(config_data *data, const config &logger)
 	> formatters_t;
 
 	auto &repository = blackhole::repository_t::instance();
-	repository.configure<sinks_t, formatters_t>();
+	repository.registrate<sinks_t, formatters_t>();
 
 	config frontends = logger.at("frontends");
 	frontends.assert_array();
@@ -138,13 +139,10 @@ static void parse_logger(config_data *data, const config &logger)
 
 	repository.add_config(log_config);
 
-	data->logger_base = repository.root<dnet_log_level>();
-	data->logger_base.add_attribute(keyword::request_id() = 0);
-
 	const config &level_config = logger.at("level");
 	const std::string &level = level_config.as<std::string>();
 	try {
-		data->logger_base.verbosity(file_logger::parse_level(level));
+		data->logger_base = repository.create<logger_base>("root", file_logger::parse_level(level));
 	} catch (error &exc) {
 		throw config_error() << level_config.path() << " " << exc.what();
 	}

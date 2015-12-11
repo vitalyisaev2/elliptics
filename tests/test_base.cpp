@@ -999,7 +999,7 @@ nodes_data::ptr start_nodes(start_nodes_config &start_config) {
 
 static void start_client_nodes(const start_nodes_config &start_config, const nodes_data::ptr &data, const std::vector<std::string> &remotes)
 {
-	data->logger.reset(new logger_base);
+	data->logger.reset(new logger_base(DNET_LOG_ERROR));
 	if (!data->directory.path().empty()) {
 		const std::string path = data->directory.path() + "/client.log";
 		data->logger.reset(new file_logger(path.c_str(), DNET_LOG_DEBUG));
@@ -1012,7 +1012,7 @@ static void start_client_nodes(const start_nodes_config &start_config, const nod
 	config.check_timeout = start_config.client_check_timeout;
 	config.stall_count = start_config.client_stall_count;
 
-	data->node.reset(new node(logger(*data->logger, blackhole::log::attributes_t()), config));
+	data->node.reset(new node(logger(*data->logger, blackhole::attribute::set_t()), config));
 	for (size_t i = 0; i < remotes.size(); ++i) {
 		data->node->add_remote(remotes[i].c_str());
 	}

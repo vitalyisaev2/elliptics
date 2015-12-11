@@ -84,9 +84,9 @@ public:
 	}
 
 private:
-	static blackhole::log::attributes_t create_attributes(session &sess)
+	static blackhole::attribute::set_t create_attributes(session &sess)
 	{
-		blackhole::log::attributes_t attributes = {
+		blackhole::attribute::set_t attributes = {
 			keyword::request_id() = sess.get_trace_id()
 		};
 		return std::move(attributes);

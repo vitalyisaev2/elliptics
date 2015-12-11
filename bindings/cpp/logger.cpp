@@ -27,24 +27,21 @@ typedef blackhole::sink::files_t<
 > elliptics_file_t;
 
 file_logger::file_logger(const char *file, log_level level)
+  : logger_base(level)
 {
-	verbosity(level);
-
-	auto formatter = blackhole::utils::make_unique<blackhole::formatter::string_t>(format());
+	auto formatter = blackhole::aux::util::make_unique<blackhole::formatter::string_t>(format());
 	formatter->set_mapper(file_logger::mapping());
-	auto sink = blackhole::utils::make_unique<elliptics_file_t>(elliptics_file_t::config_type(file));
-	auto frontend = blackhole::utils::make_unique
+	auto sink = blackhole::aux::util::make_unique<elliptics_file_t>(elliptics_file_t::config_type(file));
+	auto frontend = blackhole::aux::util::make_unique
 		<blackhole::frontend_t<blackhole::formatter::string_t, elliptics_file_t>>
 			(std::move(formatter), std::move(sink));
 
 	add_frontend(std::move(frontend));
-
-	add_attribute(keyword::request_id() = 0);
 }
 
 std::string file_logger::format()
 {
-	return "%(timestamp)s %(request_id)s/%(lwp)s/%(pid)s %(severity)s: %(message)s, attrs: [%(...L)s]";
+	return "%(timestamp)s %(request_id::/)s%(tid)s/%(pid)s %(severity)s: %(message)s%(...:, attrs\\:[:])s";
 }
 
 static const char *severity_names[] = {
@@ -147,13 +144,13 @@ void dnet_node_set_trace_id(dnet_logger *logger, uint64_t trace_id, int tracebit
 	scoped_trace_id_hook[scoped_count] = tracebit ? ~0ull : 0;
 
 	try {
-		blackhole::log::attributes_t attributes = {
+		blackhole::attribute::set_t attributes = {
 			ioremap::elliptics::keyword::request_id() = trace_id,
 			blackhole::keyword::tracebit() = bool(tracebit)
 		};
 
 		if (backend_id >= 0) {
-			attributes.insert(std::make_pair(std::string("backend_id"), blackhole::log::attribute_t(backend_id)));
+			attributes.emplace_back(std::make_pair(std::string("backend_id"), blackhole::log::attribute_t(backend_id)));
 		}
 
 
@@ -201,7 +198,7 @@ dnet_logger_record *dnet_log_open_record(dnet_logger *logger, dnet_log_level lev
 	dnet_logger_record *record = reinterpret_cast<dnet_logger_record *>(dnet_logger_record_buffer);
 
 	try {
-		new (record) blackhole::log::record_t(logger->open_record(level));
+		new (record) blackhole::record_t(logger->open_record(level));
 	} catch (...) {
 		return NULL;
 	}
@@ -217,7 +214,7 @@ int dnet_log_enabled(dnet_logger *logger, dnet_log_level level)
 {
 	dnet_logger_record *record = reinterpret_cast<dnet_logger_record *>(dnet_logger_record_buffer);
 	try {
-		new (record) blackhole::log::record_t(logger->open_record(level));
+		new (record) blackhole::record_t(logger->open_record(level));
 		int result = record->valid();
 		record->~record_t();
 		return result;
@@ -231,9 +228,21 @@ dnet_log_level dnet_log_get_verbosity(dnet_logger *logger)
 	return logger->log().verbosity();
 }
 
+static bool filter_by_tracebit(const blackhole::attribute::combined_view_t& view, dnet_log_level level, dnet_log_level current_level)
+{
+	auto passed = level >= current_level;
+	if (!passed) {
+		if (auto tracebit = view.get<int>("tracebit")) {
+			return *tracebit == 1;
+		}
+	}
+	return passed;
+}
+
 void dnet_log_set_verbosity(dnet_logger *logger, dnet_log_level level)
 {
-	logger->log().verbosity(level);
+	logger->log().set_filter(level,
+		std::bind(filter_by_tracebit, std::placeholders::_1, std::placeholders::_2, level));
 }
 
 static void dnet_log_add_message(dnet_logger_record *record, const char *format, va_list args)
@@ -250,7 +259,7 @@ static void dnet_log_add_message(dnet_logger_record *record, const char *format,
 		buffer[--len] = '\0';
 
 	try {
-		record->attributes.insert(blackhole::keyword::message() = buffer);
+		record->message(buffer);
 	} catch (...) {
 	}
 }
@@ -293,8 +302,8 @@ void dnet_log_close_record(dnet_logger_record *record)
 void dnet_log_record_set_request_id(dnet_logger_record *record, uint64_t trace_id, int tracebit)
 {
 	try {
-		record->attributes.insert(ioremap::elliptics::keyword::request_id() = trace_id);
-		record->attributes.insert(blackhole::keyword::tracebit() = tracebit);
+		record->insert(ioremap::elliptics::keyword::request_id() = trace_id);
+		record->insert(blackhole::keyword::tracebit() = tracebit);
 	} catch (...) {
 	}
 }

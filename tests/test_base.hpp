@@ -3,6 +3,7 @@
 
 #include <elliptics/cppdef.h>
 #include <boost/variant.hpp>
+#include <blackhole/macro.hpp>
 
 #ifndef TEST_DO_NOT_INCLUDE_PLACEHOLDERS
 # include <boost/bind/placeholders.hpp>
@@ -57,9 +58,9 @@ struct test_wrapper
 
 	void operator() () const
 	{
-		BH_LOG(*logger, DNET_LOG_INFO, "Start test: %s", test_name);
+		BH_LOG(*logger, DNET_LOG_INFO, "Start test: %s", test_name.c_str());
 		test_body();
-		BH_LOG(*logger, DNET_LOG_INFO, "Finish test: %s", test_name);
+		BH_LOG(*logger, DNET_LOG_INFO, "Finish test: %s", test_name.c_str());
 	}
 };
 
@@ -75,7 +76,7 @@ std::function<void ()> make(const char *test_name, Method method, session sess, 
 	sess.set_trace_id(trace_id);
 
 	test_wrapper wrapper = {
-		std::make_shared<ioremap::elliptics::logger>(sess.get_logger(), blackhole::log::attributes_t()),
+		std::make_shared<ioremap::elliptics::logger>(sess.get_logger(), blackhole::attribute::set_t()),
 		test_name,
 		std::bind(method, sess, std::forward<Args>(args)...)
 	};

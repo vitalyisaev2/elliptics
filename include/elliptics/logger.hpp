@@ -13,7 +13,7 @@
 # define BLACKHOLE_HEADER_ONLY
 #endif
 
-#include <blackhole/log.hpp>
+#include <blackhole/logger.hpp>
 #include <blackhole/logger/wrapper.hpp>
 #include <blackhole/formatter/map/value.hpp>
 #include <blackhole/defaults/severity.hpp>
@@ -52,7 +52,7 @@ DECLARE_EVENT_KEYWORD(request_id, uint64_t)
 } }
 
 typedef ioremap::elliptics::logger dnet_logger;
-typedef blackhole::log::record_t dnet_logger_record;
+typedef blackhole::record_t dnet_logger_record;
 typedef ioremap::elliptics::log_level dnet_log_level;
 
 #define ELLIPTICS_LOG_LEVEL ioremap::elliptics::log_level
